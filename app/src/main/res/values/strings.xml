@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Soundboard</string>
+    <string name="a_note">A</string>
+    <string name="b_flat_note">B♭</string>
+    <string name="b_note">B</string>
+    <string name="c_note">C</string>
+</resources>
