@@ -2,26 +2,23 @@ package com.example.soundboardstarter
 
 import android.media.AudioManager
 import android.media.SoundPool
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import com.example.soundboardstarter.databinding.ActivityMainBinding
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        val TAG = "MainActivity"
+    }
 
-    val TAG = "MainActivity"
-    private lateinit var buttonA : Button
-    private lateinit var buttonBb : Button
-    private lateinit var buttonB : Button
-    private lateinit var buttonC : Button
-    private lateinit var buttonCs : Button
-    private lateinit var buttonD : Button
-    private lateinit var buttonDs : Button
-    private lateinit var buttonE : Button
-    private lateinit var buttonF : Button
-    private lateinit var buttonFs : Button
-    private lateinit var buttonG : Button
-    private lateinit var buttonGs : Button
     private lateinit var soundPool : SoundPool
     var aNote = 0
     var bbNote = 0
@@ -36,14 +33,71 @@ class MainActivity : AppCompatActivity() {
     var gNote = 0
     var gsNote = 0
 
+    private val noteMap = HashMap<String, Int>()
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        wireWidgets()
+        var gson = Gson()
+        val inputStream = resources.openRawResource(R.raw.song)
+        val jsonString = inputStream.bufferedReader().use {
+            it.readText()
+        }
+        val type = object : TypeToken<List<Note>>(){}.type
+        val notes = gson.fromJson<List<Note>>(jsonString, type)
+        Log.d(TAG, "onCreate: $notes")
+
         initializeSoundPool()
         setListeners()
+    }
+
+    private fun stringConvert(song : String){
+        val songShorten = song.split(" ")
+        val listOfNotes = arrayListOf<Note>()
+
+        for (i in songShorten.indices step 2){
+            listOfNotes.add(Note(songShorten[i + 1].toInt(), songShorten[i]))
+        }
+    }
+
+    private suspend fun playSong(song: List<Note>) {
+        TODO()
+    }
+
+    private suspend fun playSong(){
+        withContext(Dispatchers.Main) {
+            binding.buttonMainPlaySong.text = "playing song"
+        }
+
+        playNote(aNote)
+        delay(500)
+        playNote(bNote)
+        delay(500)
+        playNote(bNote)
+        delay(500)
+        playNote(aNote)
+        delay(500)
+        playNote(bNote)
+        playNote(aNote)
+        delay(500)
+        playNote(aNote)
+        delay(500)
+        playNote(bNote)
+
+        withContext(Dispatchers.Main) {
+            binding.buttonMainPlaySong.text = "play song"
+        }
+    }
+
+    private fun delay(time: Long) {
+        try {
+            Thread.sleep(time)
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
     }
 
     private fun initializeSoundPool() {
@@ -65,39 +119,45 @@ class MainActivity : AppCompatActivity() {
         fsNote = soundPool.load(this, R.raw.scalefs, 1)
         gNote = soundPool.load(this, R.raw.scaleg, 1)
         gsNote =  soundPool.load(this, R.raw.scalegs, 1)
+
+        noteMap["A"] = aNote
+        noteMap["Bb"] = bbNote
+        noteMap["B"] = bNote
+        noteMap["C"] = cNote
+        noteMap["Cs"] = csNote
+        noteMap["D"] = dNote
+        noteMap["Ds"] = dsNote
+        noteMap["E"] = eNote
+        noteMap["F"] = fNote
+        noteMap["G"] = gNote
+        noteMap["Gs"] = gsNote
     }
 
-    private fun wireWidgets() {
-        buttonA = findViewById(R.id.button_main_a)
-        buttonBb = findViewById(R.id.button_main_bb)
-        buttonB = findViewById(R.id.button_main_b)
-        buttonC = findViewById(R.id.button_main_c)
-        buttonCs = findViewById(R.id.button_main_cs)
-        buttonD = findViewById(R.id.button_main_d)
-        buttonDs = findViewById(R.id.button_main_ds)
-        buttonE = findViewById(R.id.button_main_e)
-        buttonF = findViewById(R.id.button_main_f)
-        buttonFs = findViewById(R.id.button_main_fs)
-        buttonG = findViewById(R.id.button_main_g)
-        buttonGs = findViewById(R.id.button_main_gs)
-    }
 
     private fun setListeners() {
         val soundBoardListener = SoundBoardListener()
-        buttonA.setOnClickListener(soundBoardListener)
-        buttonBb.setOnClickListener(soundBoardListener)
-        buttonB.setOnClickListener(soundBoardListener)
-        buttonC.setOnClickListener(soundBoardListener)
-        buttonCs.setOnClickListener(soundBoardListener)
-        buttonD.setOnClickListener(soundBoardListener)
-        buttonDs.setOnClickListener(soundBoardListener)
-        buttonE.setOnClickListener(soundBoardListener)
-        buttonF.setOnClickListener(soundBoardListener)
-        buttonFs.setOnClickListener(soundBoardListener)
-        buttonG.setOnClickListener(soundBoardListener)
-        buttonGs.setOnClickListener(soundBoardListener)
+        binding.buttonMainA.setOnClickListener(soundBoardListener)
+        binding.buttonMainBb.setOnClickListener(soundBoardListener)
+        binding.buttonMainB.setOnClickListener(soundBoardListener)
+        binding.buttonMainC.setOnClickListener(soundBoardListener)
+        binding.buttonMainCs.setOnClickListener(soundBoardListener)
+        binding.buttonMainD.setOnClickListener(soundBoardListener)
+        binding.buttonMainDs.setOnClickListener(soundBoardListener)
+        binding.buttonMainE.setOnClickListener(soundBoardListener)
+        binding.buttonMainF.setOnClickListener(soundBoardListener)
+        binding.buttonMainFs.setOnClickListener(soundBoardListener)
+        binding.buttonMainG.setOnClickListener(soundBoardListener)
+        binding.buttonMainGs.setOnClickListener(soundBoardListener)
+        binding.buttonMainPlaySong.setOnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                playSong()
+            }
+        }
     }
 
+    private fun playNote(note: String) {
+        playNote(noteMap[note] ?: 0)
+    }
 
     private fun playNote(noteId : Int) {
         soundPool.play(noteId, 1f, 1f, 1, 0, 1f)
