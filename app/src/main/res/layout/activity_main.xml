@@ -150,20 +150,46 @@
 
     <Button
         android:id="@+id/button_main_playSong"
-        android:layout_width="216dp"
-        android:layout_height="51dp"
+        android:layout_width="248dp"
+        android:layout_height="53dp"
+        android:layout_marginBottom="36dp"
         android:text="play song"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_main_g" />
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="567dp" />
+        app:layout_constraintGuide_begin="528dp" />
+
+    <Button
+        android:id="@+id/button_main_octaveMinus"
+        android:layout_width="120dp"
+        android:layout_height="59dp"
+        android:layout_marginEnd="10dp"
+        android:text="octave -"
+        app:layout_constraintBottom_toTopOf="@+id/button_main_playSong"
+        app:layout_constraintEnd_toStartOf="@+id/button_main_octavePlus"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_main_g"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <Button
+        android:id="@+id/button_main_octavePlus"
+        android:layout_width="120dp"
+        android:layout_height="59dp"
+        android:text="octave +"
+        app:layout_constraintBottom_toTopOf="@+id/button_main_playSong"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/button_main_octaveMinus"
+        app:layout_constraintTop_toBottomOf="@+id/button_main_g"
+        app:layout_constraintVertical_bias="0.505" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
