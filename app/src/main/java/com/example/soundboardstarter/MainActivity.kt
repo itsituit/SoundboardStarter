@@ -24,17 +24,24 @@ class MainActivity : AppCompatActivity() {
     var bbNote = 0
     var bNote = 0
     var cNote = 0
-    var csNote = 0
+    var dbNote = 0
     var dNote = 0
-    var dsNote = 0
+    var ebNote = 0
     var eNote = 0
     var fNote = 0
-    var fsNote = 0
+    var gbNote = 0
     var gNote = 0
-    var gsNote = 0
+    var abNote = 0
 
     private val noteMap = HashMap<String, Int>()
     private lateinit var binding: ActivityMainBinding
+
+    private var currentOctave = 4
+    private val minOctave = 1
+    private val maxOctave = 7
+
+    private var isPlaying = false
+    private var shouldStop = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,44 +59,119 @@ class MainActivity : AppCompatActivity() {
 
         initializeSoundPool()
         setListeners()
+        updateOctaveButtons()
     }
 
-    private fun stringConvert(song : String){
-        val songShorten = song.split(" ")
-        val listOfNotes = arrayListOf<Note>()
+    private fun stringToNotes(song : String): List<Note>{
+        val trimmed = song.split(" ")
+        val notes = ArrayList<Note>()
 
-        for (i in songShorten.indices step 2){
-            listOfNotes.add(Note(songShorten[i + 1].toInt(), songShorten[i]))
+        /*for (i in trimmed.indices step 2){
+            notes.add(Note(trimmed[i + 1].toInt(), trimmed[i]))*/
+        var i = 0
+        while (i + 1 < trimmed.size) {
+            val name = trimmed[i]
+            val duration = trimmed[i + 1].toInt()
+            notes.add(Note(duration, name))
+            i += 2
+        }
+
+        return notes
+    }
+
+
+    private fun stringToChords(song : String): List<Chord> {
+        val trimmed = song.split(" ")
+        val chords = ArrayList<Chord>()
+
+        var i = 0
+        while (i + 1 < trimmed.size) {
+            val chord = trimmed[i]
+            val notes = chord.split("-")
+            val duration = trimmed[i + 1].toInt()
+            chords.add(Chord(duration, notes))
+            i += 2
+        }
+        return chords
+    }
+
+    private suspend fun playSong(song: String) {
+        val trimmed = song.split(" ")
+
+        var i = 0
+        var lastOctave = 4
+
+        while (i + 1 < trimmed.size && !shouldStop) {
+            val notes = trimmed[i]
+            val duration = trimmed[i + 1].toLong()
+
+            val note = notes.split("-")
+            for (i in note) {
+                lastOctave = playSongNote(i, lastOctave)
+            }
+
+            delay(duration)
+            i += 2
         }
     }
+
+    private fun playSongNote(note: String, lastOctave: Int): Int {
+        var base: String
+        var octave: String
+
+        if (note.length >= 2 && (note[1] == 'b' || note[1] == 's')) {
+            base = note.substring(0, 2)
+            if (note.length > 2) octave = note.substring(2)
+            else octave = ""
+        } else {
+            base = note.substring(0, 1)
+            if (note.length > 1) octave = note.substring(1)
+            else octave = ""
+        }
+
+        val noteId = noteMap[base] ?: 0
+
+        if (octave == "") {
+            val rate = octaveToRate(lastOctave)
+            soundPool.play(noteId, 1f, 1f, 1, 0, rate)
+
+            return lastOctave
+        } else {
+            val rate = octaveToRate(octave.toInt())
+            soundPool.play(noteId, 1f, 1f, 1, 0, rate)
+
+            return octave.toInt()
+        }
+    }
+
 
     private suspend fun playSong(song: List<Note>) {
-        TODO()
-    }
-
-    private suspend fun playSong(){
-        withContext(Dispatchers.Main) {
+        /*withContext(Dispatchers.Main) {
             binding.buttonMainPlaySong.text = "playing song"
         }
+        */
 
-        playNote(aNote)
-        delay(500)
-        playNote(bNote)
-        delay(500)
-        playNote(bNote)
-        delay(500)
-        playNote(aNote)
-        delay(500)
-        playNote(bNote)
-        playNote(aNote)
-        delay(500)
-        playNote(aNote)
-        delay(500)
-        playNote(bNote)
 
-        withContext(Dispatchers.Main) {
+        for (i in song) {
+            if (shouldStop) break
+            playNote(i.note)
+            delay(i.duration.toLong())
+        }
+
+        /*withContext(Dispatchers.Main) {
             binding.buttonMainPlaySong.text = "play song"
         }
+        */
+    }
+
+    private suspend fun playTest(){
+        //val testSong = "A 500 B 500 A 500 A 250 G 250 A 500"
+        //playSong(stringToNotes(testSong))
+        //val testSong = "Bb-D-F 500 Bb3 500 Gs5 500"
+        val virtualInsanity1 = "Bb3 200 Eb4-Eb3 300 Bb4-Eb-Gb 800 Eb3 200 Ab2-Ab3 300 C4-Eb-Gb 800 Ab2 200 Db2-Db3 300 B4-Eb-F-Ab 800 Db3 200 Gb2-Gb3 300 Bb4-Db-F-Ab 800 Gb2 200 C2-C3 300 Bb4-Eb-Gb 800 C3 200 B2-B3 300 B4-Eb-Gb 800 B3 200 Bb2-Bb3 300 Bb4-D-F 800"
+        val virtualInsanity2 = "Bb2-Bb3-Bb5-Db-Gb 200 Bb2-Bb3-Ab5 100 Db5-Bb6 200 Bb3-Db5-Bb6 100 Eb2-Eb3 200 Bb5 100 Db5-Ab 200 Eb3-Bb5 100 Eb4-Db5-Gb5 200 Bb4-Bb5 100 Eb3-Db5 200 Gb4-Ab-Bb5-Eb 100 Ab2-Gb3 200 Gb4-Ab-Bb5-Eb 300 Ab3-Gb5 300 Gb4 100 Eb4 200 Ab3-Db5 200 Bb2-Bb3-Bb5-Eb-F-Ab 200 Ab5 200 Db3-Gb5 200 Db4 200 Ab3-Db5 100 Db3-Eb5 100 F4-Bb5-Eb5 100"
+        //playSong(virtualInsanity1)
+        playSong(virtualInsanity2)
     }
 
     private fun delay(time: Long) {
@@ -111,26 +193,27 @@ class MainActivity : AppCompatActivity() {
         bbNote = soundPool.load(this, R.raw.scalebb, 1)
         bNote = soundPool.load(this, R.raw.scaleb, 1)
         cNote =  soundPool.load(this, R.raw.scalec, 1)
-        csNote = soundPool.load(this, R.raw.scalecs, 1)
+        dbNote = soundPool.load(this, R.raw.scalecs, 1)
         dNote = soundPool.load(this, R.raw.scaled, 1)
-        dsNote = soundPool.load(this, R.raw.scaleds, 1)
+        ebNote = soundPool.load(this, R.raw.scaleds, 1)
         eNote =  soundPool.load(this, R.raw.scalee, 1)
         fNote = soundPool.load(this, R.raw.scalef, 1)
-        fsNote = soundPool.load(this, R.raw.scalefs, 1)
+        gbNote = soundPool.load(this, R.raw.scalefs, 1)
         gNote = soundPool.load(this, R.raw.scaleg, 1)
-        gsNote =  soundPool.load(this, R.raw.scalegs, 1)
+        abNote =  soundPool.load(this, R.raw.scalegs, 1)
 
         noteMap["A"] = aNote
         noteMap["Bb"] = bbNote
         noteMap["B"] = bNote
         noteMap["C"] = cNote
-        noteMap["Cs"] = csNote
+        noteMap["Db"] = dbNote
         noteMap["D"] = dNote
-        noteMap["Ds"] = dsNote
+        noteMap["Eb"] = ebNote
         noteMap["E"] = eNote
         noteMap["F"] = fNote
+        noteMap["Gb"] = gbNote
         noteMap["G"] = gNote
-        noteMap["Gs"] = gsNote
+        noteMap["Ab"] = abNote
     }
 
 
@@ -140,19 +223,68 @@ class MainActivity : AppCompatActivity() {
         binding.buttonMainBb.setOnClickListener(soundBoardListener)
         binding.buttonMainB.setOnClickListener(soundBoardListener)
         binding.buttonMainC.setOnClickListener(soundBoardListener)
-        binding.buttonMainCs.setOnClickListener(soundBoardListener)
+        binding.buttonMainDb.setOnClickListener(soundBoardListener)
         binding.buttonMainD.setOnClickListener(soundBoardListener)
-        binding.buttonMainDs.setOnClickListener(soundBoardListener)
+        binding.buttonMainEb.setOnClickListener(soundBoardListener)
         binding.buttonMainE.setOnClickListener(soundBoardListener)
         binding.buttonMainF.setOnClickListener(soundBoardListener)
-        binding.buttonMainFs.setOnClickListener(soundBoardListener)
+        binding.buttonMainGb.setOnClickListener(soundBoardListener)
         binding.buttonMainG.setOnClickListener(soundBoardListener)
-        binding.buttonMainGs.setOnClickListener(soundBoardListener)
+        binding.buttonMainAb.setOnClickListener(soundBoardListener)
+
         binding.buttonMainPlaySong.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                playSong()
+            if (!isPlaying) {
+                isPlaying = true
+                shouldStop = false
+                binding.buttonMainPlaySong.text = "pause song"
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    playTest()
+
+                    withContext(Dispatchers.Main) {
+                        isPlaying = false
+                        shouldStop = false
+                        binding.buttonMainPlaySong.text = "play song"
+                    }
+                }
+            } else {
+                shouldStop = true
+                binding.buttonMainPlaySong.text = "play song"
             }
         }
+
+        binding.buttonMainOctaveMinus.setOnClickListener {
+            if (currentOctave > minOctave) {
+                currentOctave--
+                updateOctaveButtons()
+            }
+        }
+
+        binding.buttonMainOctavePlus.setOnClickListener {
+            if (currentOctave < maxOctave) {
+                currentOctave++
+                updateOctaveButtons()
+            }
+        }
+    }
+
+    private fun updateOctaveButtons() {
+        var minText = ""
+        var maxText = ""
+
+        if (currentOctave == minOctave) {
+            minText = "min"
+        } else minText = "octave ${currentOctave - 1}"
+
+        if (currentOctave == maxOctave) {
+            maxText = "max"
+        } else maxText = "octave ${currentOctave + 1}"
+
+        binding.buttonMainOctaveMinus.text = minText
+        binding.buttonMainOctavePlus.text = maxText
+
+        binding.buttonMainOctaveMinus.isEnabled = currentOctave > minOctave
+        binding.buttonMainOctavePlus.isEnabled = currentOctave < maxOctave
     }
 
     private fun playNote(note: String) {
@@ -160,7 +292,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun playNote(noteId : Int) {
-        soundPool.play(noteId, 1f, 1f, 1, 0, 1f)
+        val rate = octaveToRate(currentOctave)
+
+        soundPool.play(noteId, 1f, 1f, 1, 0, rate)
+    }
+
+    private fun octaveToRate(octave: Int): Float {
+        return when (octave) {
+            1 -> 0.125f
+            2 -> 0.25f
+            3 -> 0.5f
+            4 -> 1f
+            5 -> 2f
+            6 -> 4f
+            7 -> 8f
+            else -> 1f
+        }
     }
 
     private inner class SoundBoardListener : View.OnClickListener {
@@ -170,14 +317,14 @@ class MainActivity : AppCompatActivity() {
                 R.id.button_main_bb -> playNote(bbNote)
                 R.id.button_main_b -> playNote(bNote)
                 R.id.button_main_c -> playNote(cNote)
-                R.id.button_main_cs -> playNote(csNote)
+                R.id.button_main_db -> playNote(dbNote)
                 R.id.button_main_d -> playNote(dNote)
-                R.id.button_main_ds -> playNote(dsNote)
+                R.id.button_main_eb -> playNote(ebNote)
                 R.id.button_main_e -> playNote(eNote)
                 R.id.button_main_f -> playNote(fNote)
-                R.id.button_main_fs -> playNote(fsNote)
+                R.id.button_main_gb -> playNote(gbNote)
                 R.id.button_main_g -> playNote(gNote)
-                R.id.button_main_gs -> playNote(gsNote)
+                R.id.button_main_ab -> playNote(abNote)
             }
         }
     }
