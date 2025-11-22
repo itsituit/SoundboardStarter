@@ -168,10 +168,13 @@ class MainActivity : AppCompatActivity() {
         //val testSong = "A 500 B 500 A 500 A 250 G 250 A 500"
         //playSong(stringToNotes(testSong))
         //val testSong = "Bb-D-F 500 Bb3 500 Gs5 500"
-        val virtualInsanity1 = "Bb3 200 Eb4-Eb3 300 Bb4-Eb-Gb 800 Eb3 200 Ab2-Ab3 300 C4-Eb-Gb 800 Ab2 200 Db2-Db3 300 B4-Eb-F-Ab 800 Db3 200 Gb2-Gb3 300 Bb4-Db-F-Ab 800 Gb2 200 C2-C3 300 Bb4-Eb-Gb 800 C3 200 B2-B3 300 B4-Eb-Gb 800 B3 200 Bb2-Bb3 300 Bb4-D-F 800"
-        val virtualInsanity2 = "Bb2-Bb3-Bb5-Db-Gb 200 Bb2-Bb3-Ab5 100 Db5-Bb6 200 Bb3-Db5-Bb6 100 Eb2-Eb3 200 Bb5 100 Db5-Ab 200 Eb3-Bb5 100 Eb4-Db5-Gb5 200 Bb4-Bb5 100 Eb3-Db5 200 Gb4-Ab-Bb5-Eb 100 Ab2-Gb3 200 Gb4-Ab-Bb5-Eb 300 Ab3-Gb5 300 Gb4 100 Eb4 200 Ab3-Db5 200 Bb2-Bb3-Bb5-Eb-F-Ab 200 Ab5 200 Db3-Gb5 200 Db4 200 Ab3-Db5 100 Db3-Eb5 100 F4-Bb5-Eb5 100"
-        //playSong(virtualInsanity1)
+        val virtualInsanity1 = "Bb3 150 Eb4-Eb3 300 Bb4-Eb-Gb 800 Eb3 150 Ab2-Ab3 300 C4-Eb-Gb 800 Ab2 150 Db2-Db3 300 B4-Eb-F-Ab 800 Db3 150 Gb2-Gb3 300 Bb4-Db-F-Ab 800 Gb2 150 C2-C3 300 Bb4-Eb-Gb 800 C3 150 B2-B3 300 B4-Eb-Gb 800 B3 150 Bb2-Bb3 300 Bb4-D-F 600"
+        val virtualInsanity2 = "Bb2-Bb3-Bb5-Db-Gb 200 Bb2-Bb3-Ab5 100 Db5-Bb6 200 Bb3-Db5-Bb6 100 Eb2-Eb3 200 Bb5 100 Db5-Ab 200 Eb3-Bb5 100 Eb4-Db5-Gb5 200 Bb4-Bb5 100 Eb3-Db5 200 Gb4-Ab-Bb5-Eb 100 Ab2-Gb3 200 Gb4-Ab-Bb5-Eb 300 Ab3-Gb5 150 Gb4 150 Eb4 150 Ab3-Db5 250 Bb2-Bb3-Bb5-Eb-F-Ab 300 Ab5 200 Db3-Gb5 150 Db4 130 Ab3-Db5 150 Db3-Eb5 150 F4-Bb5-Eb5 150 Gb2-F3 150 F4-Bb5-Eb5 300 Gb3-F4-Bb5 130 F4 130 Db4 100 Gb3 220 Bb5 100 C2-C3-Db5 200 Eb5 100 Bb5 200 C3-Bb5-C-Eb-Gb 300 C4 100 Bb4 100 C3 100 Bb5 200 B2-B3-Db5 200 Eb5 100 Bb5 200 B3-Bb5-B-Eb-Gb 300 Eb4 100 Bb4 100 B3 200 Ab4-B5-D5-Gb5"
+        //not an ounce of math or logic was used here
+
+        playSong(virtualInsanity1)
         playSong(virtualInsanity2)
+        //listen to the rest here! https://www.youtube.com/watch?v=4JkIs37a2JE
     }
 
     private fun delay(time: Long) {
@@ -236,7 +239,7 @@ class MainActivity : AppCompatActivity() {
             if (!isPlaying) {
                 isPlaying = true
                 shouldStop = false
-                binding.buttonMainPlaySong.text = "pause song"
+                binding.buttonMainPlaySong.text = "stop song"
 
                 CoroutineScope(Dispatchers.IO).launch {
                     playTest()
@@ -249,6 +252,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 shouldStop = true
+                isPlaying = false
                 binding.buttonMainPlaySong.text = "play song"
             }
         }
